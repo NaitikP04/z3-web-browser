@@ -20,7 +20,4 @@ class Load extends Phaser.Scene {
         this.scene.add('z3Scene', new Z3Scene(this.my), true); // Start the scene and pass myData
     }
 
-    // Never get here since a new scene is started in create()
-    update() {
-    }
 }
