@@ -68,7 +68,6 @@ class Z3Scene extends Phaser.Scene {
                 });
             }
         });
-        //solver.add(And(xvar.le(10), xvar.ge(8), yvar.eq(6)));  // x <= 10, x >=9
 
         // Run Z3 solver, find solution and sat/unsat
         console.log(await solver.check());
