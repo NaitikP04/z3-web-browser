@@ -264,6 +264,46 @@ class Z3Scene extends Phaser.Scene {
         return coordinates;
     }
 
+    // async create() {
+    //     this.map = this.add.tilemap("three-farmhouses", this.TILESIZE, this.TILESIZE, this.TILEHEIGHT, this.TILEWIDTH);
+
+    //     // Add a tileset to the map
+    //     this.tileset = this.map.addTilesetImage("kenney-tiny-town", "tilemap_tiles");
+
+    //     // Create layers
+    //     this.groundLayer = this.map.createLayer("Ground-n-Walkways", this.tileset, 0, 0);
+    //     this.treesLayer = this.map.createLayer("Trees-n-Bushes", this.tileset, 0, 0);
+    //     this.housesLayer = this.map.createLayer("Houses-n-Fences", this.tileset, 0, 0);
+
+    //     // Define constraints
+    //     let fenceInclude = {
+    //         type: "box",
+    //         center: { x: 36, y: 4 },
+    //         size: { x: 4, y: 4 }
+    //     };
+    //     let world = {
+    //         type: "box",
+    //         center: { x: 19, y: 12 },
+    //         size: { x: 38, y: 24 }
+    //     };
+    //     let pathTiles = {
+    //         type: "tile",
+    //         tiles: [44, 40, 42, 43]
+    //     };
+
+    //     // Place sign
+    //     let signCoord = await this.placeTileConstraint([pathTiles], [], this.groundLayer);
+    //     if (signCoord) this.housesLayer.putTileAt(83, signCoord.x, signCoord.y); // Tile index 83 for sign
+
+    //     // Place wheelbarrow
+    //     let wheelbarrowCoord = await this.placeTileConstraint([world, fenceInclude], [], this.housesLayer);
+    //     if (wheelbarrowCoord) this.housesLayer.putTileAt(57, wheelbarrowCoord.x, wheelbarrowCoord.y); // Tile index 57 for wheelbarrow
+
+    //     // Camera settings
+    //     this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+    //     this.cameras.main.setZoom(this.SCALE);
+    // }
+
     async create() {
         this.map = this.add.tilemap("three-farmhouses", this.TILESIZE, this.TILESIZE, this.TILEHEIGHT, this.TILEWIDTH);
 
@@ -276,31 +316,73 @@ class Z3Scene extends Phaser.Scene {
         this.housesLayer = this.map.createLayer("Houses-n-Fences", this.tileset, 0, 0);
 
         // Define constraints
-        let fenceInclude = {
-            type: "box",
-            center: { x: 36, y: 4 },
-            size: { x: 4, y: 4 }
-        };
         let world = {
             type: "box",
             center: { x: 19, y: 12 },
             size: { x: 38, y: 24 }
         };
+
+        // Define inclusion areas for fences
+        let fenceInclude1 = {
+            type: "box",
+            center: { x: 36, y: 4 },
+            size: { x: 4, y: 4 }
+        };
+        let fenceInclude2 = {
+            type: "box",
+            center: { x: 25, y: 18 }, // Calculated center
+            size: { x: 9, y: 4 }      // Calculated dimensions
+        };
+
+        // Define exclusion for fence tiles (to avoid placing wheelbarrow on fences)
+        let fenceTiles = {
+            type: "tile",
+            tiles: [/* Add fence tile indices here, e.g., */ 12, 13, 14]
+        };
+
         let pathTiles = {
             type: "tile",
             tiles: [44, 40, 42, 43]
         };
+        let houseTiles = {
+            type: "tile",
+            tiles: [49, 50, 52, 51, 61, 62, 64, 63]
+        };
 
-        // Place sign
+        // Place a sign near a path
         let signCoord = await this.placeTileConstraint([pathTiles], [], this.groundLayer);
-        if (signCoord) this.housesLayer.putTileAt(83, signCoord.x, signCoord.y); // Tile index 83 for sign
+        if (signCoord) {
+            console.log("Placing sign at coordinate:", signCoord);
+            this.housesLayer.putTileAt(84, signCoord.x, signCoord.y); // Tile index 84 for sign
+        } else {
+            console.warn("No valid position found for sign placement.");
+        }
 
-        // Place wheelbarrow
-        let wheelbarrowCoord = await this.placeTileConstraint([world, fenceInclude], [], this.housesLayer);
-        if (wheelbarrowCoord) this.housesLayer.putTileAt(57, wheelbarrowCoord.x, wheelbarrowCoord.y); // Tile index 57 for wheelbarrow
+        // Place a wheelbarrow inside any fence area, avoiding fence tiles themselves
+        let wheelbarrowCoord = await this.placeTileConstraint(
+            [world, fenceInclude1, fenceInclude2],
+            [fenceTiles],
+            this.housesLayer
+        );
+        if (wheelbarrowCoord) {
+            console.log("Placing wheelbarrow at coordinate:", wheelbarrowCoord);
+            this.housesLayer.putTileAt(58, wheelbarrowCoord.x, wheelbarrowCoord.y); // Tile index 58 for wheelbarrow
+        } else {
+            console.warn("No valid position found for wheelbarrow placement.");
+        }
+
+        // Place a beehive in the open world, avoiding houses
+        let beehiveCoord = await this.placeTileConstraint([world], [houseTiles], this.housesLayer);
+        if (beehiveCoord) {
+            console.log("Placing beehive at coordinate:", beehiveCoord);
+            this.housesLayer.putTileAt(95, beehiveCoord.x, beehiveCoord.y); // Tile index 95 for beehive
+        } else {
+            console.warn("No valid position found for beehive placement.");
+        }
 
         // Camera settings
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.setZoom(this.SCALE);
     }
+
 }
