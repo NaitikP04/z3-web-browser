@@ -30,12 +30,12 @@ class Z3Scene extends Phaser.Scene {
         Then, randomly pick from the list of valid values (from the JavaScript list of valid values.
     */
 
-    async phaserContraints(includes, excludes, layer) {
-        const { Context, Solver, Int, And, Or, Distinct } = new this.my.Context("main");
+    async placeTileConstraint(includes, excludes, layer) {
+        const { Solver, Int, And, Or, Distinct, Not } = new this.my.Context("main");
         const solver = new Solver();
 
-        const xvar = Int('x');
-        const yvar = Int('y');
+        const xvar = Int.const('x');
+        const yvar = Int.const('y');
 
         // Add constraints
         includes.forEach(inc => {
@@ -82,6 +82,17 @@ class Z3Scene extends Phaser.Scene {
         return coord;
     }
 
+    findTilesByType(layer, tileIndex){
+        const coordinates = [];
+        layer.forEachTile(tile => {
+            if(tile.index == tileIndex){
+                coordinates.push({x:tile.x, y:tile.y});
+            }
+        });
+        console.log("found ", coordinates.length, " tiles of type ", tileIndex);
+        return coordinates;
+    }
+
     async create(){
         this.map = this.add.tilemap("three-farmhouses", this.TILESIZE, this.TILESIZE, this.TILEHEIGHT, this.TILEWIDTH);
 
@@ -123,7 +134,7 @@ class Z3Scene extends Phaser.Scene {
         this.treesLayer = this.map.createLayer("Trees-n-Bushes", this.tileset, 0, 0);
         this.housesLayer = this.map.createLayer("Houses-n-Fences", this.tileset, 0, 0);
 
-        console.log(this.findTilesByType(this.housesLayer, 49));
+        // console.log(this.findTilesByType(this.housesLayer, 49));
         // Add z3
         let sign = await this.placeTileConstraint([pathTiles], [], this.groundLayer);
         this.housesLayer.putTileAt(sign.x,sign.y, 83)
