@@ -118,21 +118,12 @@ class Z3Scene extends Phaser.Scene {
             size: { x: 38, y: 24 }
         };
 
-        // Define inclusion areas for fenced-in regions, adjusted to exclude fences
-        let fenceInclude1 = {
-            type: "box",
-            center: { x: 36, y: 4 }, // Center of first fenced area
-            size: { x: 4, y: 4 }     // Shrink dimensions to exclude edges of the fence
-        };
-        let fenceInclude2 = {
+        // Define inclusion area for the second fenced region
+        let fenceInclude = {
             type: "box",
             center: { x: 25, y: 18 }, // Center of second fenced area
-            size: { x: 9, y: 4 }      // Shrink dimensions to exclude edges of the fence
+            size: { x: 7, y: 2 }      // Dimensions for the rectangular fenced area
         };
-
-        // Debug inclusion areas
-        console.log("Fence 1 inclusion area:", fenceInclude1);
-        console.log("Fence 2 inclusion area:", fenceInclude2);
 
         // Path tiles for sign placement
         let pathTiles = {
@@ -140,25 +131,22 @@ class Z3Scene extends Phaser.Scene {
             tiles: [44, 40, 42, 43] // Path tile indices
         };
 
-        // House tiles to avoid for beehive placement
-        let houseTiles = {
-            type: "tile",
-            tiles: [49, 50, 52, 51, 61, 62, 64, 63]
-        };
-
-        // Place a sign near a path
-        let signCoord = await this.placeTileConstraint([pathTiles], [], this.groundLayer);
-        if (signCoord) {
-            console.log("Placing sign at coordinate:", signCoord);
-            this.housesLayer.putTileAt(84, signCoord.x, signCoord.y); // Tile index 84 for sign
-        } else {
-            console.warn("No valid position found for sign placement.");
+        // Place at least 2 signs near different paths
+        for (let i = 0; i < 2; i++) {
+            let signCoord = await this.placeTileConstraint([pathTiles], [], this.groundLayer);
+            if (signCoord) {
+                console.log(`Placing sign ${i + 1} at coordinate:`, signCoord);
+                this.housesLayer.putTileAt(84, signCoord.x, signCoord.y); // Tile index 84 for sign
+            } else {
+                console.warn(`No valid position found for sign ${i + 1} placement.`);
+                break;
+            }
         }
 
-        // Place a wheelbarrow inside any fenced area, excluding fences
+        // Place a wheelbarrow inside the second fenced area
         let wheelbarrowCoord = await this.placeTileConstraint(
-            [fenceInclude1, fenceInclude2],
-            [], // No exclusion for this test
+            [fenceInclude], // Only consider the second fenced area
+            [],              // No exclusions
             this.housesLayer
         );
 
@@ -167,23 +155,10 @@ class Z3Scene extends Phaser.Scene {
             this.housesLayer.putTileAt(58, wheelbarrowCoord.x, wheelbarrowCoord.y); // Tile index 58 for wheelbarrow
         } else {
             console.warn("No valid position found for wheelbarrow placement.");
-            console.log("Fence 1 inclusion area:", fenceInclude1);
-            console.log("Fence 2 inclusion area:", fenceInclude2);
-        }
-
-        // Place a beehive in the open world, avoiding houses
-        let beehiveCoord = await this.placeTileConstraint([world], [houseTiles], this.housesLayer);
-        if (beehiveCoord) {
-            console.log("Placing beehive at coordinate:", beehiveCoord);
-            this.housesLayer.putTileAt(95, beehiveCoord.x, beehiveCoord.y); // Tile index 95 for beehive
-        } else {
-            console.warn("No valid position found for beehive placement.");
         }
 
         // Camera settings
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.setZoom(this.SCALE);
     }
-
-
 }
