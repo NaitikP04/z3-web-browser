@@ -118,11 +118,10 @@ class Z3Scene extends Phaser.Scene {
             size: { x: 38, y: 24 }
         };
 
-        // Define inclusion area for the second fenced region
-        let fenceInclude = {
-            type: "box",
-            center: { x: 25, y: 18 }, // Center of second fenced area
-            size: { x: 7, y: 2 }      // Dimensions for the rectangular fenced area
+        // Define house tiles to avoid for beehive placement
+        let houseTiles = {
+            type: "tile",
+            tiles: [49, 50, 52, 51, 61, 62, 64, 63] // House tile indices
         };
 
         // Path tiles for sign placement
@@ -143,18 +142,13 @@ class Z3Scene extends Phaser.Scene {
             }
         }
 
-        // Place a wheelbarrow inside the second fenced area
-        let wheelbarrowCoord = await this.placeTileConstraint(
-            [fenceInclude], // Only consider the second fenced area
-            [],              // No exclusions
-            this.housesLayer
-        );
-
-        if (wheelbarrowCoord) {
-            console.log("Placing wheelbarrow at coordinate:", wheelbarrowCoord);
-            this.housesLayer.putTileAt(58, wheelbarrowCoord.x, wheelbarrowCoord.y); // Tile index 58 for wheelbarrow
+        // Place a beehive in the open world, avoiding house tiles
+        let beehiveCoord = await this.placeTileConstraint([world], [houseTiles], this.housesLayer);
+        if (beehiveCoord) {
+            console.log("Placing beehive at coordinate:", beehiveCoord);
+            this.housesLayer.putTileAt(95, beehiveCoord.x, beehiveCoord.y); // Tile index 95 for beehive
         } else {
-            console.warn("No valid position found for wheelbarrow placement.");
+            console.warn("No valid position found for beehive placement.");
         }
 
         // Camera settings
