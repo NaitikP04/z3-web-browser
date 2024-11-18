@@ -100,46 +100,6 @@ class Z3Scene extends Phaser.Scene {
         return coordinates;
     }
 
-    // async create() {
-    //     this.map = this.add.tilemap("three-farmhouses", this.TILESIZE, this.TILESIZE, this.TILEHEIGHT, this.TILEWIDTH);
-
-    //     // Add a tileset to the map
-    //     this.tileset = this.map.addTilesetImage("kenney-tiny-town", "tilemap_tiles");
-
-    //     // Create layers
-    //     this.groundLayer = this.map.createLayer("Ground-n-Walkways", this.tileset, 0, 0);
-    //     this.treesLayer = this.map.createLayer("Trees-n-Bushes", this.tileset, 0, 0);
-    //     this.housesLayer = this.map.createLayer("Houses-n-Fences", this.tileset, 0, 0);
-
-    //     // Define constraints
-    //     let fenceInclude = {
-    //         type: "box",
-    //         center: { x: 36, y: 4 },
-    //         size: { x: 4, y: 4 }
-    //     };
-    //     let world = {
-    //         type: "box",
-    //         center: { x: 19, y: 12 },
-    //         size: { x: 38, y: 24 }
-    //     };
-    //     let pathTiles = {
-    //         type: "tile",
-    //         tiles: [44, 40, 42, 43]
-    //     };
-
-    //     // Place sign
-    //     let signCoord = await this.placeTileConstraint([pathTiles], [], this.groundLayer);
-    //     if (signCoord) this.housesLayer.putTileAt(83, signCoord.x, signCoord.y); // Tile index 83 for sign
-
-    //     // Place wheelbarrow
-    //     let wheelbarrowCoord = await this.placeTileConstraint([world, fenceInclude], [], this.housesLayer);
-    //     if (wheelbarrowCoord) this.housesLayer.putTileAt(57, wheelbarrowCoord.x, wheelbarrowCoord.y); // Tile index 57 for wheelbarrow
-
-    //     // Camera settings
-    //     this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-    //     this.cameras.main.setZoom(this.SCALE);
-    // }
-
     async create() {
         this.map = this.add.tilemap("three-farmhouses", this.TILESIZE, this.TILESIZE, this.TILEHEIGHT, this.TILEWIDTH);
 
@@ -162,13 +122,17 @@ class Z3Scene extends Phaser.Scene {
         let fenceInclude1 = {
             type: "box",
             center: { x: 36, y: 4 }, // Center of first fenced area
-            size: { x: 2, y: 2 }     // Shrink dimensions to exclude edges of the fence
+            size: { x: 4, y: 4 }     // Shrink dimensions to exclude edges of the fence
         };
         let fenceInclude2 = {
             type: "box",
             center: { x: 25, y: 18 }, // Center of second fenced area
-            size: { x: 7, y: 2 }      // Shrink dimensions to exclude edges of the fence
+            size: { x: 9, y: 4 }      // Shrink dimensions to exclude edges of the fence
         };
+
+        // Debug inclusion areas
+        console.log("Fence 1 inclusion area:", fenceInclude1);
+        console.log("Fence 2 inclusion area:", fenceInclude2);
 
         // Path tiles for sign placement
         let pathTiles = {
@@ -194,14 +158,17 @@ class Z3Scene extends Phaser.Scene {
         // Place a wheelbarrow inside any fenced area, excluding fences
         let wheelbarrowCoord = await this.placeTileConstraint(
             [fenceInclude1, fenceInclude2],
-            [],
+            [], // No exclusion for this test
             this.housesLayer
         );
+
         if (wheelbarrowCoord) {
             console.log("Placing wheelbarrow at coordinate:", wheelbarrowCoord);
             this.housesLayer.putTileAt(58, wheelbarrowCoord.x, wheelbarrowCoord.y); // Tile index 58 for wheelbarrow
         } else {
             console.warn("No valid position found for wheelbarrow placement.");
+            console.log("Fence 1 inclusion area:", fenceInclude1);
+            console.log("Fence 2 inclusion area:", fenceInclude2);
         }
 
         // Place a beehive in the open world, avoiding houses
