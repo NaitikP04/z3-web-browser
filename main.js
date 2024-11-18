@@ -17,6 +17,29 @@ const model = solver.model();
 const xVal = model.eval(x);
 console.log(`${xVal}`);
 
+var cursors;
+const SCALE = 2.0;
+var my = {sprite: {}};
+
+let config = {
+  parent: 'phaser-game',
+  type: Phaser.CANVAS,
+  render: {
+      pixelArt: true  // prevent pixel art from getting blurred when scaled
+  },
+  width: 1200,
+  height: 700,
+  scene: {
+    create: create,
+  }
+}
+
+function create() {
+  this.scene.add('Load', new Load(my), true); // Start the scene and pass myData
+}
+
+const game = new Phaser.Game(config)
+
 document.querySelector('#app').innerHTML = `
   <div>
     <p>Check the console</p>
