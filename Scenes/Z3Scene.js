@@ -153,7 +153,7 @@
 // }
 
 class Z3Scene extends Phaser.Scene {
-    constructor(context) {
+    constructor(my) {
         super("z3scene");
         this.my = my;
     }
