@@ -18,7 +18,6 @@ class Z3Scene extends Phaser.Scene {
         const xvar = Int.const('x');
         const yvar = Int.const('y');
 
-        // Add constraints for included areas
         includes.forEach(inc => {
             if (inc.type === "box") {
                 solver.add(
@@ -42,7 +41,6 @@ class Z3Scene extends Phaser.Scene {
             }
         });
 
-        // Add constraints for excluded areas
         excludes.forEach(inc => {
             if (inc.type === "box") {
                 solver.add(
@@ -66,7 +64,6 @@ class Z3Scene extends Phaser.Scene {
             }
         });
 
-        // Collect all valid positions
         const validCoords = [];
         while ((await solver.check()) === "sat") {
             const model = solver.model();
@@ -74,7 +71,6 @@ class Z3Scene extends Phaser.Scene {
             const yVal = parseInt(model.eval(yvar).asString());
             validCoords.push({ x: xVal, y: yVal });
 
-            // Exclude this solution for the next iteration
             solver.add(Not(And(xvar.eq(xVal), yvar.eq(yVal))));
         }
 
@@ -83,7 +79,6 @@ class Z3Scene extends Phaser.Scene {
             return null;
         }
 
-        // Pick a random solution
         const randomCoord = validCoords[Math.floor(Math.random() * validCoords.length)];
         console.log("Selected random valid coordinate:", randomCoord);
         return randomCoord;
@@ -135,7 +130,7 @@ class Z3Scene extends Phaser.Scene {
             let signCoord = await this.placeTileConstraint([pathTiles], [], this.groundLayer);
             if (signCoord) {
                 console.log(`Placing sign ${i + 1} at coordinate:`, signCoord);
-                this.housesLayer.putTileAt(84, signCoord.x, signCoord.y); // Tile index 84 for sign
+                this.housesLayer.putTileAt(84, signCoord.x, signCoord.y); w
             } else {
                 console.warn(`No valid position found for sign ${i + 1} placement.`);
                 break;
@@ -146,7 +141,7 @@ class Z3Scene extends Phaser.Scene {
         let beehiveCoord = await this.placeTileConstraint([world], [houseTiles], this.housesLayer);
         if (beehiveCoord) {
             console.log("Placing beehive at coordinate:", beehiveCoord);
-            this.housesLayer.putTileAt(95, beehiveCoord.x, beehiveCoord.y); // Tile index 95 for beehive
+            this.housesLayer.putTileAt(95, beehiveCoord.x, beehiveCoord.y); 
         } else {
             console.warn("No valid position found for beehive placement.");
         }
